@@ -19,6 +19,8 @@ package com.spidertracks.datanucleus.query;
 
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,7 +61,11 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  * 
  */
 public class JDOQLQuery extends AbstractJDOQLQuery {
-
+	/**
+	 * this boolean is to check whether the query has only has non indexed fields as filters
+	 */
+	public boolean nonIndexedQuery = true;
+	private CassandraQueryExpressionEvaluator evaluator;
 	private static int DEFAULT_MAX = 1000;
 
 	/**
@@ -110,7 +116,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected Object performExecute(Map parameters) {
-
+		
 		long startTime = System.currentTimeMillis();
 
 		if (NucleusLogger.QUERY.isDebugEnabled()) {
@@ -171,10 +177,12 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		// a query was specified, perform a filter with secondary cassandra
 		// indexes
-		if (filter != null) {
-
-			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
-
+		evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
+		if(filter != null){
+			checkFilterValidity(filter);
+		}
+		if (filter != null && !nonIndexedQuery) {
+					
 			Operand opTree = (Operand) filter.evaluate(evaluator);
 
 			// there's a discriminator so be sure to include it
@@ -197,7 +205,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
 				clr, subclasses, idColumnBytes, descriminiatorCol, byteContext);
 
-		if (this.getOrdering() != null || this.getGrouping() != null) {
+		if (this.getOrdering() != null || this.getGrouping() != null || nonIndexedQuery) {
 
 			// Apply any result restrictions to the results
 			JavaQueryEvaluator resultMapper = new JDOQLEvaluator(this, results,
@@ -215,7 +223,26 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		return results;
 
 	}
-
+	public void checkFilterValidity(Expression filter){
+		AnnotaionEvaluator an = new AnnotaionEvaluator(candidateClass);
+		ArrayList<String> annotaionlist = an.getAnnotatedFields("javax.jdo.annotations.Index");
+		
+		ArrayList<String> expressionlist = evaluator.getPrimaryExpressions(filter);
+		if(annotaionlist == null){
+			nonIndexedQuery =false;
+			return;
+		}
+		if(expressionlist == null){
+			return;
+		}
+		for(String ex:expressionlist){
+			if(annotaionlist.indexOf(ex)!=-1){
+				nonIndexedQuery = false;
+				return;
+			}
+		}
+		
+	}
 	/**
 	 * Used to load specific keys
 	 * 

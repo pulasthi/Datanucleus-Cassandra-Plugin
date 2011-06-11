@@ -86,6 +86,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		object1.setTestLong(100);
 		object1.setTestShort((short) 1);
 		object1.setTestString("one");
+		object1.setNonIndexedString("one1");
+
 
 		setupPm.makePersistent(object1);
 
@@ -99,6 +101,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		object2.setTestLong(200);
 		object2.setTestShort((short) 2);
 		object2.setTestString("two");
+		object2.setNonIndexedString("two1");
 
 		setupPm.makePersistent(object2);
 
@@ -112,6 +115,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		object3.setTestLong(300);
 		object3.setTestShort((short) 3);
 		object3.setTestString("three");
+		object3.setNonIndexedString("three1");
+
 
 		setupPm.makePersistent(object3);
 
@@ -262,7 +267,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
-	 * result test
+	 *non index result test
 	 */
 	@SuppressWarnings("rawtypes")
 	@Test
@@ -271,8 +276,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		Transaction tx = pm.currentTransaction();
 		try {
 			tx.begin();
-			Query q = pm.newQuery(PrimitiveObject.class);
-			q.setFilter("testString == 'one'");
+			Query q = pm.newQuery("SELECT FROM com.spidertracks.datanucleus.basic.model.PrimitiveObject WHERE nonIndexedString == \"one1\"");
 			Collection c = (Collection) q.execute();
 			assertEquals(1, c.size());
 			Iterator it = c.iterator();

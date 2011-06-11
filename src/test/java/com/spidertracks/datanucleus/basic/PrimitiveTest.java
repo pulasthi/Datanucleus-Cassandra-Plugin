@@ -66,15 +66,7 @@ public class PrimitiveTest extends CassandraTest {
 
 		PrimitiveObject object = new PrimitiveObject();
 		object.setTestByte((byte) 0xf1);
-		object.setTestBool(true);
-		object.setTestChar('t');
-		object.setTestDouble(100.10);
-		object.setTestFloat((float) 200.20);
-		object.setTestInt(40);
-		object.setTestLong(200);
-		object.setTestShort((short) 5);
-		object.setTestString("foobar");
-
+		
 		// now save our object
 		pm.makePersistent(object);
 

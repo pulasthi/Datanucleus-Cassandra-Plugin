@@ -19,6 +19,8 @@ package com.spidertracks.datanucleus;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
@@ -50,7 +52,13 @@ public abstract class CassandraTest {
 	public static final String KEYSPACE = "TestingKeyspace";
 
 	protected static PersistenceManagerFactory pmf;
-
+                public static void main(String[] args) {
+        try {
+            setup();
+        } catch (Exception ex) {
+            Logger.getLogger(CassandraTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 	/**
 	 * Set embedded cassandra up and spawn it in a new thread.
 	 * 

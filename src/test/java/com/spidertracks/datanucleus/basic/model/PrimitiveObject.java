@@ -42,12 +42,26 @@ public class PrimitiveObject extends BaseEntity{
 	@Persistent
 	private byte testByte;
 
+	@Index
 	@Persistent
 	private char testChar;
-
-	@Persistent
+	
 	@Index
+	@Persistent
 	private String testString;
+	
+	
+	@Persistent
+	private String nonIndexedString;
+
+	
+	public String getNonIndexedString() {
+		return nonIndexedString;
+	}
+
+	public void setNonIndexedString(String nonIndexedString) {
+		this.nonIndexedString = nonIndexedString;
+	}
 
 	public boolean isTestBool() {
 		return testBool;
