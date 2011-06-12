@@ -86,7 +86,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		object1.setTestLong(100);
 		object1.setTestShort((short) 1);
 		object1.setTestString("one");
-
+		object1.setNonIndexedString("none");
+		
 		setupPm.makePersistent(object1);
 
 		object2 = new PrimitiveObject();
@@ -99,7 +100,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		object2.setTestLong(200);
 		object2.setTestShort((short) 2);
 		object2.setTestString("two");
-
+	    object2.setNonIndexedString("ntwo");
+	      
 		setupPm.makePersistent(object2);
 
 		object3 = new PrimitiveObject();
@@ -112,7 +114,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		object3.setTestLong(300);
 		object3.setTestShort((short) 3);
 		object3.setTestString("three");
-
+		object3.setNonIndexedString("nthree");
+        
 		setupPm.makePersistent(object3);
 
 		Calendar cal = Calendar.getInstance();
@@ -284,6 +287,31 @@ public class JDOQLBasicTest extends CassandraTest {
 			}
 			pm.close();
 		}
+	}
+	
+	/**
+	 * non index result test
+	 */
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testFilterNonIndexed() {
+	    PersistenceManager pm = pmf.getPersistenceManager();
+	    Transaction tx = pm.currentTransaction();
+	    try {
+	        tx.begin();
+	        Query q = pm.newQuery("SELECT FROM com.spidertracks.datanucleus.basic.model.Primi" +
+	        "tiveObject WHERE nonIndexedString == \"none\"");
+	        Collection c = (Collection) q.execute();
+	        assertEquals(1, c.size());
+	        Iterator it = c.iterator();
+	        assertEquals("one", ((PrimitiveObject) it.next()).getTestString());
+	        tx.commit();
+	    } finally {
+	        if (tx.isActive()) {
+	            tx.rollback();
+	        }
+	        pm.close();
+	    }
 	}
 
 	/**
