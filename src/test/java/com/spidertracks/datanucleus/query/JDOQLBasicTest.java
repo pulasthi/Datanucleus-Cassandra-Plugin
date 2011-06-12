@@ -198,7 +198,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * Runs basic query extent
 	 */
 	@SuppressWarnings("rawtypes")
-	
+	@Test
 	public void testExtent() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -223,6 +223,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * Runs basic query
 	 */
 	@SuppressWarnings("rawtypes")
+	@Test
 	public void testBasicQuery() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -245,7 +246,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * ordering
 	 */
 	@SuppressWarnings("rawtypes")
-	
+	@Test
 	public void testOrdering() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -272,7 +273,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * result test
 	 */
 	@SuppressWarnings("rawtypes")
-	
+	@Test
 	public void testFilter() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -321,7 +322,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * Test query with parameters (NUCCORE-205)
 	 */
 	@SuppressWarnings("rawtypes")
-	
+	@Test
 	public void testFilterWithParameters() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		try {
@@ -358,7 +359,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testEqual() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -379,7 +380,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testEqualStringId() throws Exception {
 
 		// now perform our select. We want everyone with firstname =
@@ -408,7 +409,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testEqualNoValue() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -431,7 +432,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveAnd() {
 
 		// now perform our select. We want everyone with firstname =
@@ -486,7 +487,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveGreaterThanEqual() {
 
 		// now perform our select. We want everyone with firstname =
@@ -568,7 +569,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveLessThanEqualOrder() {
 
 		// now perform our select. We want everyone with firstname =
@@ -598,7 +599,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveLessThanEqualOrderRange() {
 
 		// now perform our select. We want everyone with firstname =
@@ -661,7 +662,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveLessThan() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 
@@ -686,7 +687,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testRetrieveLessThanNoValue() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 
@@ -799,7 +800,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * @throws InterruptedException
 	 */
 	@SuppressWarnings("unchecked")
-	
+	@Test
 	public void testMultipleChildren() throws InterruptedException {
 		Consistency.setDefault(ConsistencyLevel.QUORUM);
 		
