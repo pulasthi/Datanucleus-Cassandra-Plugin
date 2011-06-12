@@ -66,17 +66,17 @@ public class CassandraQueryExpressionEvaluator extends
 	private Stack<IndexParam> indexKeys = new Stack<IndexParam>();
 	private Stack<Operand> operationStack = new Stack<Operand>();
 	private List<String> primaryExpressions = new ArrayList<String>();
-	
+
 	private AbstractClassMetaData metaData;
 
 	/** Map of input parameter values, keyed by their name. */
 	private Map<String, Object> parameterValues;
 
-	
+
 	private int maxSize;
-	
+
 	private ByteConverterContext byteConverter;
-	
+
 
 	/**
 	 * Constructor for an in-memory evaluator.

@@ -34,26 +34,27 @@ import java.util.Map;
 public class AnnotationEvaluator
 {
     /**
-* Map to contain all the annotations and the related fields.
-*/
+    * Map to contain all the annotations and the related fields.
+    */
     private Map<String, ArrayList<String>> annotationMap = new HashMap<String, ArrayList<String>>();
+
     /**
-* The class object to be evaluated .
-*/
+    * The class object to be evaluated .
+    */
     private Class<? extends Object> cls;
 
     /**
-* non args constructor for the AnnotationEvaluator.
-*/
+    * non args constructor for the AnnotationEvaluator.
+    */
     public AnnotationEvaluator() {
 
 
     }
-    
+
     /**
-* Constructor that takes a class object as a argument.
-* @param cls the class to be evaluated
-*/
+    * Constructor that takes a class object as a argument.
+    * @param cls the class to be evaluated
+    */
     public AnnotationEvaluator(Class<? extends Object> cls) {
         this.cls = cls;
         this.annotationMap = getFieldannotationMap(cls);
@@ -61,10 +62,10 @@ public class AnnotationEvaluator
 
 
     /**
-* calls getFieldannotationMap(Class).
-* @param dataObject the object of the class to be evaluated
-* @return the Map containing each type and there respective fields array.
-*/
+    * calls getFieldannotationMap(Class).
+    * @param dataObject the object of the class to be evaluated
+    * @return the Map containing each type and there respective fields array.
+    */
     public Map<String, ArrayList<String>> getFieldannotationMap(Object dataObject) {
         cls = dataObject.getClass();
 
@@ -72,11 +73,11 @@ public class AnnotationEvaluator
     }
 
     /**
-* loops through the class fields and finds annotations defined for each field and groups
-* together the fields with the same annotation.
-* @param cls the class to be evaluated
-* @return the Map containing each type and there respective fields array.
-*/
+    * loops through the class fields and finds annotations defined for each field and groups
+    * together the fields with the same annotation.
+    * @param cls the class to be evaluated
+    * @return the Map containing each type and there respective fields array.
+    */
     public Map<String, ArrayList<String>> getFieldannotationMap(Class<? extends Object> cls) {
         this.cls = cls;
         if (cls.getSuperclass() != null) {
@@ -103,10 +104,10 @@ public class AnnotationEvaluator
     }
 
     /**
-* Retrieves the list of fields with the given annotation.
-* @param annotation the annotation to be evaluated
-* @return a ArrayList which contains all the fields that have the given annotation.
-*/
+    * Retrieves the list of fields with the given annotation.
+    * @param annotation the annotation to be evaluated
+    * @return a ArrayList which contains all the fields that have the given annotation.
+    */
     public List<String> getAnnotatedFields(String annotation) {
         List<String> annotatedFields = null;
         if (annotation == null) {

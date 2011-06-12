@@ -48,10 +48,10 @@ public class PrimitiveObject extends BaseEntity{
 	@Persistent
 	@Index
 	private String testString;
-	
+
 	@Persistent
     private String nonIndexedString;
-	
+
 	public String getNonIndexedString() {
         return nonIndexedString;
     }

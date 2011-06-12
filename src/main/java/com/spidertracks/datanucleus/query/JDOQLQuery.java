@@ -59,7 +59,7 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  * 
  */
 public class JDOQLQuery extends AbstractJDOQLQuery {
-    
+
     public boolean nonIndexedQuery = true;
     private CassandraQueryExpressionEvaluator evaluator;
 	private static int DEFAULT_MAX = 1000;
@@ -68,7 +68,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * 
 	 private static final long serialVersionUID = 1L;
@@ -170,14 +170,14 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			}
 		}
-		
+
 		evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
 		if(filter != null){
 		    checkFilterValidity(filter);
 		}
 		// a query was specified, perform a filter with secondary cassandra
 		// indexes
-		
+
 		if (filter != null && !nonIndexedQuery) {
 
 
