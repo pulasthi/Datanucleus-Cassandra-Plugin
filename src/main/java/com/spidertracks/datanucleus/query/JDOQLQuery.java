@@ -19,8 +19,6 @@ package com.spidertracks.datanucleus.query;
 
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,11 +59,7 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  * 
  */
 public class JDOQLQuery extends AbstractJDOQLQuery {
-	/**
-	 * this boolean is to check whether the query has only has non indexed fields as filters
-	 */
-	public boolean nonIndexedQuery = true;
-	private CassandraQueryExpressionEvaluator evaluator;
+
 	private static int DEFAULT_MAX = 1000;
 
 	/**
@@ -127,7 +121,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Expression filter = this.getCompilation().getExprFilter();
 
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
-		.getPoolName();
+				.getPoolName();
 
 		// Serializer serializer = ((CassandraStoreManager)
 		// ec.getStoreManager())
@@ -137,8 +131,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 				.getStoreManager()).getByteConverterContext();
 
 		AbstractClassMetaData acmd = ec.getMetaDataManager()
-		.getMetaDataForClass(candidateClass.getName(),
-				ec.getClassLoaderResolver());
+				.getMetaDataForClass(candidateClass.getName(),
+						ec.getClassLoaderResolver());
 
 		String columnFamily = MetaDataUtils.getColumnFamily(acmd);
 
@@ -170,26 +164,24 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			if (this.getOrdering() == null) {
 				throw new NucleusDataStoreException(
-				"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
+						"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
 
 			}
 		}
 
 		// a query was specified, perform a filter with secondary cassandra
 		// indexes
-		evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
-		if(filter != null){
-			checkFilterValidity(filter);
-		}
-		if (filter != null && !nonIndexedQuery) {
+		if (filter != null) {
+
+			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
 
 			Operand opTree = (Operand) filter.evaluate(evaluator);
 
 			// there's a discriminator so be sure to include it
 			if (acmd.hasDiscriminatorStrategy()) {
 				List<Bytes> descriminatorValues = MetaDataUtils
-				.getDescriminatorValues(acmd.getFullClassName(), clr,
-						ec, byteContext);
+						.getDescriminatorValues(acmd.getFullClassName(), clr,
+								ec, byteContext);
 
 				opTree = opTree.optimizeDescriminator(descriminiatorCol,
 						descriminatorValues);
@@ -205,7 +197,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
 				clr, subclasses, idColumnBytes, descriminiatorCol, byteContext);
 
-		if (this.getOrdering() != null || this.getGrouping() != null || nonIndexedQuery) {
+		if (this.getOrdering() != null || this.getGrouping() != null) {
 
 			// Apply any result restrictions to the results
 			JavaQueryEvaluator resultMapper = new JDOQLEvaluator(this, results,
@@ -221,31 +213,6 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		}
 
 		return results;
-
-	}
-
-	/**
-	 * checks whether the filter has only non indexed fields
-	 * @param filter
-	 */
-	public void checkFilterValidity(Expression filter){
-		AnnotationEvaluator ae = new AnnotationEvaluator(candidateClass);
-		List<String> annotationlist = ae.getAnnotatedFields("javax.jdo.annotations.Index");
-
-		List<String> expressionlist = evaluator.getPrimaryExpressions(filter);
-		if(annotationlist == null){
-			nonIndexedQuery =true;
-			return;
-		}
-		if(expressionlist == null){
-			return;
-		}
-		for(String ex:expressionlist){
-			if(annotationlist.indexOf(ex)!=-1){
-				nonIndexedQuery = false;
-				return;
-			}
-		}
 
 	}
 
@@ -283,8 +250,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 						descriminatorColumn));
 
 				String className = org.datanucleus.metadata.MetaDataUtils
-				.getClassNameFromDiscriminatorValue(descriminatorValue,
-						acmd.getDiscriminatorMetaData(), ec);
+						.getClassNameFromDiscriminatorValue(descriminatorValue,
+								acmd.getDiscriminatorMetaData(), ec);
 
 				targetClass = clr.classForName(className);
 
@@ -296,7 +263,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {
 				throw new NucleusDataStoreException(
-				"Only single field identities are supported");
+						"Only single field identities are supported");
 			}
 
 			if (!ClassUtils.typesAreCompatible(candidateClass,
