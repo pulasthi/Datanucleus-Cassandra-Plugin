@@ -48,19 +48,8 @@ public class PrimitiveObject extends BaseEntity{
 	@Persistent
 	@Index
 	private String testString;
-	
-	@Persistent
-    private String nonIndexedString;
-	
-	public String getNonIndexedString() {
-        return nonIndexedString;
-    }
 
-    public void setNonIndexedString(String nonIndexedString) {
-        this.nonIndexedString = nonIndexedString;
-    }
-
-    public boolean isTestBool() {
+	public boolean isTestBool() {
 		return testBool;
 	}
 
