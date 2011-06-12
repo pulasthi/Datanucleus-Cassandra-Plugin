@@ -116,7 +116,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected Object performExecute(Map parameters) {
-		
+
 		long startTime = System.currentTimeMillis();
 
 		if (NucleusLogger.QUERY.isDebugEnabled()) {
@@ -127,7 +127,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Expression filter = this.getCompilation().getExprFilter();
 
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
-				.getPoolName();
+		.getPoolName();
 
 		// Serializer serializer = ((CassandraStoreManager)
 		// ec.getStoreManager())
@@ -137,8 +137,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 				.getStoreManager()).getByteConverterContext();
 
 		AbstractClassMetaData acmd = ec.getMetaDataManager()
-				.getMetaDataForClass(candidateClass.getName(),
-						ec.getClassLoaderResolver());
+		.getMetaDataForClass(candidateClass.getName(),
+				ec.getClassLoaderResolver());
 
 		String columnFamily = MetaDataUtils.getColumnFamily(acmd);
 
@@ -170,7 +170,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			if (this.getOrdering() == null) {
 				throw new NucleusDataStoreException(
-						"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
+				"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
 
 			}
 		}
@@ -182,14 +182,14 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			checkFilterValidity(filter);
 		}
 		if (filter != null && !nonIndexedQuery) {
-					
+
 			Operand opTree = (Operand) filter.evaluate(evaluator);
 
 			// there's a discriminator so be sure to include it
 			if (acmd.hasDiscriminatorStrategy()) {
 				List<Bytes> descriminatorValues = MetaDataUtils
-						.getDescriminatorValues(acmd.getFullClassName(), clr,
-								ec, byteContext);
+				.getDescriminatorValues(acmd.getFullClassName(), clr,
+						ec, byteContext);
 
 				opTree = opTree.optimizeDescriminator(descriminiatorCol,
 						descriminatorValues);
@@ -223,26 +223,32 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		return results;
 
 	}
+
+	/**
+	 * checks whether the filter has only non indexed fields
+	 * @param filter
+	 */
 	public void checkFilterValidity(Expression filter){
-		AnnotaionEvaluator an = new AnnotaionEvaluator(candidateClass);
-		ArrayList<String> annotaionlist = an.getAnnotatedFields("javax.jdo.annotations.Index");
-		
-		ArrayList<String> expressionlist = evaluator.getPrimaryExpressions(filter);
-		if(annotaionlist == null){
-			nonIndexedQuery =false;
+		AnnotationEvaluator ae = new AnnotationEvaluator(candidateClass);
+		List<String> annotationlist = ae.getAnnotatedFields("javax.jdo.annotations.Index");
+
+		List<String> expressionlist = evaluator.getPrimaryExpressions(filter);
+		if(annotationlist == null){
+			nonIndexedQuery =true;
 			return;
 		}
 		if(expressionlist == null){
 			return;
 		}
 		for(String ex:expressionlist){
-			if(annotaionlist.indexOf(ex)!=-1){
+			if(annotationlist.indexOf(ex)!=-1){
 				nonIndexedQuery = false;
 				return;
 			}
 		}
-		
+
 	}
+
 	/**
 	 * Used to load specific keys
 	 * 
@@ -277,8 +283,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 						descriminatorColumn));
 
 				String className = org.datanucleus.metadata.MetaDataUtils
-						.getClassNameFromDiscriminatorValue(descriminatorValue,
-								acmd.getDiscriminatorMetaData(), ec);
+				.getClassNameFromDiscriminatorValue(descriminatorValue,
+						acmd.getDiscriminatorMetaData(), ec);
 
 				targetClass = clr.classForName(className);
 
@@ -290,7 +296,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {
 				throw new NucleusDataStoreException(
-						"Only single field identities are supported");
+				"Only single field identities are supported");
 			}
 
 			if (!ClassUtils.typesAreCompatible(candidateClass,

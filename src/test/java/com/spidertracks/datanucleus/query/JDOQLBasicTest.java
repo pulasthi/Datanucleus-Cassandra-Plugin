@@ -50,6 +50,7 @@ import com.spidertracks.datanucleus.basic.inheritance.recursive.GrandChildTwoTwo
 import com.spidertracks.datanucleus.basic.model.InvitationToken;
 import com.spidertracks.datanucleus.basic.model.Person;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
+import com.spidertracks.datanucleus.basic.model.UnitData;
 import com.spidertracks.datanucleus.client.Consistency;
 
 public class JDOQLBasicTest extends CassandraTest {
@@ -66,6 +67,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	private Person p3;
 	private Person p4;
 	private Person p5;
+	
 
 	@Before
 	public void setUp() throws Exception {
@@ -119,12 +121,12 @@ public class JDOQLBasicTest extends CassandraTest {
 
 
 		setupPm.makePersistent(object3);
-
+		
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -20);
 
 		p1 = new Person();
-		p1.setEmail("p1@test.com");
+		p1.setEmail("p1.com");
 		p1.setFirstName("firstName1");
 		p1.setLastName("lastName1");
 		p1.setLastLogin(cal.getTime());
@@ -132,7 +134,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		cal.add(Calendar.DATE, 2);
 
 		p2 = new Person();
-		p2.setEmail("p2@test.com");
+		p2.setEmail("p2.com");
 		p2.setFirstName("firstName1");
 		p2.setLastName("secondName1");
 		p2.setLastLogin(cal.getTime());
@@ -140,7 +142,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		cal.add(Calendar.DATE, 2);
 
 		p3 = new Person();
-		p3.setEmail("p3@test.com");
+		p3.setEmail("p3.com");
 		p3.setFirstName("firstName1");
 		p3.setLastName("secondName2");
 		p3.setLastLogin(cal.getTime());
@@ -148,7 +150,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		cal.add(Calendar.DATE, 2);
 
 		p4 = new Person();
-		p4.setEmail("p4@test.com");
+		p4.setEmail("p4.com");
 		p4.setFirstName("firstName2");
 		p4.setLastName("secondName2");
 		p4.setLastLogin(cal.getTime());
@@ -156,7 +158,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		cal.add(Calendar.DATE, 2);
 
 		p5 = new Person();
-		p5.setEmail("p5@test.com");
+		p5.setEmail("p5.com");
 		p5.setFirstName("firstName3");
 		p5.setLastName("secondName3");
 		p5.setLastLogin(cal.getTime());
@@ -196,7 +198,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * Runs basic query extent
 	 */
 	@SuppressWarnings("rawtypes")
-	@Test
+	
 	public void testExtent() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -243,7 +245,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * ordering
 	 */
 	@SuppressWarnings("rawtypes")
-	@Test
+	
 	public void testOrdering() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -267,17 +269,17 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
-	 *non index result test
+	 * result test
 	 */
 	@SuppressWarnings("rawtypes")
-	@Test
+	
 	public void testFilter() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
 		try {
 			tx.begin();
-			Query q = pm.newQuery("SELECT FROM com.spidertracks.datanucleus.basic.model.PrimitiveObject WHERE nonIndexedString == \"one1\"");
-			Collection c = (Collection) q.execute();
+		    Query q = pm.newQuery(PrimitiveObject.class);
+			q.setFilter("testString == 'one'"); Collection c = (Collection) q.execute();
 			assertEquals(1, c.size());
 			Iterator it = c.iterator();
 			assertEquals("one", ((PrimitiveObject) it.next()).getTestString());
@@ -291,10 +293,35 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
-	 * Test query with parameters (NUCCORE-205)
+	 * non index result test
 	 */
 	@SuppressWarnings("rawtypes")
 	@Test
+	public void testFilterNonIndexed() {
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction tx = pm.currentTransaction();
+		try {
+			tx.begin();
+			Query q = pm.newQuery("SELECT FROM com.spidertracks.datanucleus.basic.model.Primi" +
+					"tiveObject WHERE nonIndexedString == \"one1\"");
+			Collection c = (Collection) q.execute();
+			assertEquals(1, c.size());
+			Iterator it = c.iterator();
+			assertEquals("one", ((PrimitiveObject) it.next()).getTestString());
+			tx.commit();
+		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		}
+	}
+	
+	/**
+	 * Test query with parameters (NUCCORE-205)
+	 */
+	@SuppressWarnings("rawtypes")
+	
 	public void testFilterWithParameters() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		try {
@@ -331,7 +358,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testEqual() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -352,7 +379,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testEqualStringId() throws Exception {
 
 		// now perform our select. We want everyone with firstname =
@@ -381,7 +408,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testEqualNoValue() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -404,7 +431,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveAnd() {
 
 		// now perform our select. We want everyone with firstname =
@@ -430,7 +457,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveOR() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -459,7 +486,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveGreaterThanEqual() {
 
 		// now perform our select. We want everyone with firstname =
@@ -487,7 +514,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveGreaterThan() {
 
 		// now perform our select. We want everyone with firstname =
@@ -512,7 +539,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveLessThanEqual() {
 
 		// now perform our select. We want everyone with firstname =
@@ -541,7 +568,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveLessThanEqualOrder() {
 
 		// now perform our select. We want everyone with firstname =
@@ -571,7 +598,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveLessThanEqualOrderRange() {
 
 		// now perform our select. We want everyone with firstname =
@@ -601,7 +628,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings({ "unchecked", "unused" })
-	@Test
+	
 	public void testRetrieveGreaterLessThanEqualNoOrderRange() {
 
 		// now perform our select. We want everyone with firstname =
@@ -634,7 +661,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveLessThan() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 
@@ -659,7 +686,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * the relation fields.
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testRetrieveLessThanNoValue() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 
@@ -772,7 +799,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * @throws InterruptedException
 	 */
 	@SuppressWarnings("unchecked")
-	@Test
+	
 	public void testMultipleChildren() throws InterruptedException {
 		Consistency.setDefault(ConsistencyLevel.QUORUM);
 		
