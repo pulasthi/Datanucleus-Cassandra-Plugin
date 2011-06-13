@@ -60,6 +60,8 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  */
 public class JDOQLQuery extends AbstractJDOQLQuery {
 
+    public boolean nonIndexedQuery = true;
+    private CassandraQueryExpressionEvaluator evaluator;
 	private static int DEFAULT_MAX = 1000;
 
 	/**
@@ -169,9 +171,14 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			}
 		}
 
+		evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
+
+		if(filter != null){
+		    checkFilterValidity(filter);
+		}
 		// a query was specified, perform a filter with secondary cassandra
 		// indexes
-		if (filter != null) {
+		if (filter != null && !nonIndexedQuery) {
 
 			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
 
@@ -197,7 +204,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
 				clr, subclasses, idColumnBytes, descriminiatorCol, byteContext);
 
-		if (this.getOrdering() != null || this.getGrouping() != null) {
+		if (this.getOrdering() != null || this.getGrouping() != null || nonIndexedQuery) {
 
 			// Apply any result restrictions to the results
 			JavaQueryEvaluator resultMapper = new JDOQLEvaluator(this, results,
@@ -332,5 +339,30 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		}
 
 		return candidateKeys;
+	}
+
+	/**
+	* checks whether the filter has only non indexed fields
+	* @param filter
+	*/
+	public void checkFilterValidity(Expression filter){
+		AnnotationEvaluator ae = new AnnotationEvaluator(candidateClass);
+		List<String> annotationlist = ae.getAnnotatedFields("javax.jdo.annotations.Index");
+
+		List<String> expressionlist = evaluator.getPrimaryExpressions(filter);
+		if(annotationlist == null){
+			nonIndexedQuery =true;
+			return;
+		}
+		if(expressionlist == null){
+			return;
+		}
+		for(String ex:expressionlist){
+			if(annotationlist.indexOf(ex)!=-1){
+				nonIndexedQuery = false;
+				return;
+			}
+		}
+
 	}
 }

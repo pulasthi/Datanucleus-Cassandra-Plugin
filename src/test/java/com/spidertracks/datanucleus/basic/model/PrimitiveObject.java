@@ -9,17 +9,13 @@ import javax.jdo.annotations.Persistent;
 
 import com.spidertracks.datanucleus.model.BaseEntity;
 
-
-
 /**
  * @author Todd Nine
  * Basic object for testing primitive persistence.  Only support types in java.lang
  * 
  */
 @PersistenceCapable(table = "PrimitiveObject")
-public class PrimitiveObject extends BaseEntity{
-
-
+public class PrimitiveObject extends BaseEntity {
 
 	@Persistent
 	private boolean testBool;
@@ -48,6 +44,17 @@ public class PrimitiveObject extends BaseEntity{
 	@Persistent
 	@Index
 	private String testString;
+
+	@Persistent
+	private String nonIndexedString;
+
+	public String getNonIndexedString() {
+		return nonIndexedString;
+    }
+
+	public void setNonIndexedString(String nonIndexedString) {
+		this.nonIndexedString = nonIndexedString;
+    }
 
 	public boolean isTestBool() {
 		return testBool;
@@ -120,6 +127,5 @@ public class PrimitiveObject extends BaseEntity{
 	public void setTestString(String testString) {
 		this.testString = testString;
 	}
-
 
 }
