@@ -67,8 +67,6 @@
 			<version>2.3-ec</version>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
@@ -171,6 +169,17 @@
 			<version>3.0.1</version>
 			<type>jar</type>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>1.1-rc-1</version>
 		</dependency>
 	</dependencies>
 
