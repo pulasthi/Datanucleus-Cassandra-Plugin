@@ -52,44 +52,62 @@ import com.spidertracks.datanucleus.client.Consistency;
 import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
+import com.spidertracks.datanucleus.utils.FilterUtils;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
+/**
+ * Handles JPQL queries.
+ * @version $Id$
+ */
 public class JPQLQuery extends AbstractJPQLQuery
 {
+
     /**
-     *
+     * default maximum.
      */
-    private static final long serialVersionUID = 1L;
-    public boolean nonIndexedQuery = true;
-    private CassandraQueryExpressionEvaluator evaluator;
     private static int DEFAULT_MAX = 1000;
 
     /**
-     * Creates a new query instance with the given execution context
+     * serial version id.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * boolean to test whether the query is indexed or non-indexed.
+     */
+    private boolean nonIndexedQuery = true;
+
+    /**
+     * Cassandra expression evaluator.
+     */
+    private CassandraQueryExpressionEvaluator evaluator;
+
+    /**
+     * Creates a new query instance with the given execution context.
      * @param ec the associated execution context for this query
      */
     public JPQLQuery(ExecutionContext ec) {
-        super(ec,(JPQLQuery)null);
+        super(ec, (JPQLQuery) null);
         // TODO Auto-generated constructor stub
     }
 
     /**
      * Creates a new query instance with the given execution context and the
-     * given JPQLQuery
+     * given JPQLQuery.
      * @param ec the associated execution context
      * @param q the associated JPQLQuery
      */
-    public JPQLQuery(ExecutionContext ec, JPQLQuery q){
-        super(ec,q);
+    public JPQLQuery(ExecutionContext ec, JPQLQuery q) {
+        super(ec, q);
     }
 
     /**
      * Creates an new query instance with the given execution context and the
-     * given string query
+     * given string query.
      * @param ec the associated execution context
      * @param query the associated string query
      */
-    public JPQLQuery(ExecutionContext ec, String query){
+    public JPQLQuery(ExecutionContext ec, String query) {
         super(ec, query);
     }
 
@@ -99,24 +117,24 @@ public class JPQLQuery extends AbstractJPQLQuery
 
         long startTime = System.currentTimeMillis();
 
-        if(NucleusLogger.QUERY.isDebugEnabled()){
-            NucleusLogger.QUERY.debug(LOCALISER.msg("0121121","JPQL",
-                    getSingleStringQuery()), null);
+        if (NucleusLogger.QUERY.isDebugEnabled()) {
+            NucleusLogger.QUERY.debug(
+                    LOCALISER.msg("0121121", "JPQL", getSingleStringQuery()),
+                    null);
 
         }
 
         Expression filter = this.getCompilation().getExprFilter();
 
-        String poolName = ((CassandraStoreManager)ec.getStoreManager()).getPoolName();
-
+        String poolName = ((CassandraStoreManager) ec.getStoreManager())
+                .getPoolName();
 
         ByteConverterContext byteContext = ((CassandraStoreManager) ec
                 .getStoreManager()).getByteConverterContext();
 
-
-        AbstractClassMetaData acmd =   ec.getMetaDataManager()
-        .getMetaDataForClass(candidateClass.getName(),
-                ec.getClassLoaderResolver());
+        AbstractClassMetaData acmd = ec.getMetaDataManager()
+                .getMetaDataForClass(candidateClass.getName(),
+                        ec.getClassLoaderResolver());
 
         String columnFamily = MetaDataUtils.getColumnFamily(acmd);
 
@@ -136,9 +154,9 @@ public class JPQLQuery extends AbstractJPQLQuery
 
             descriminiatorCol = getDiscriminatorColumnName(discriminator);
 
-            selectColumns = new Bytes[] { idColumnBytes, descriminiatorCol };
+            selectColumns = new Bytes[]{idColumnBytes, descriminiatorCol };
         } else {
-            selectColumns = new Bytes[] { idColumnBytes };
+            selectColumns = new Bytes[]{idColumnBytes };
         }
 
         int range = DEFAULT_MAX;
@@ -148,20 +166,23 @@ public class JPQLQuery extends AbstractJPQLQuery
 
             if (this.getOrdering() == null) {
                 throw new NucleusDataStoreException(
-                        "You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
+                        "You cannot invoke a without an ordering expression against Cassandra. Results will be "
+                                + "randomly ordered from Cassnadra and need order to page");
 
             }
         }
 
-        evaluator = new CassandraQueryExpressionEvaluator(acmd, range, byteContext, parameters);
-        if(filter != null){
-            checkFilterValidity(filter);
+        evaluator = new CassandraQueryExpressionEvaluator(acmd, range,
+                byteContext, parameters);
+        if (filter != null) {
+            FilterUtils filterutils = new FilterUtils();
+            nonIndexedQuery = filterutils.checkFilterValidity(filter, candidateClass, evaluator);
         }
 
         if (filter != null && !nonIndexedQuery) {
             Operand opTree = (Operand) filter.evaluate(evaluator);
 
-         // there's a discriminator so be sure to include it
+            // there's a discriminator so be sure to include it
             if (acmd.hasDiscriminatorStrategy()) {
                 List<Bytes> descriminatorValues = MetaDataUtils
                         .getDescriminatorValues(acmd.getFullClassName(), clr,
@@ -170,17 +191,18 @@ public class JPQLQuery extends AbstractJPQLQuery
                 opTree = opTree.optimizeDescriminator(descriminiatorCol,
                         descriminatorValues);
             }
-         // perform a query rewrite to take into account descriminator values
+            // perform a query rewrite to take into account descriminator values
             opTree.performQuery(poolName, columnFamily, selectColumns);
 
             candidateKeys = opTree.getCandidateKeys();
-        }else {
+        } else {
             candidateKeys = getAll(poolName, columnFamily, selectColumns, range);
         }
         Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
                 clr, subclasses, idColumnBytes, descriminiatorCol, byteContext);
 
-        if (this.getOrdering() != null || this.getGrouping() != null || nonIndexedQuery) {
+        if (this.getOrdering() != null || this.getGrouping() != null
+                || nonIndexedQuery) {
 
             // Apply any result restrictions to the results
             JavaQueryEvaluator resultMapper = new JPQLEvaluator(this, results,
@@ -199,28 +221,22 @@ public class JPQLQuery extends AbstractJPQLQuery
     }
 
     /**
-     * Used to load specific keys
-     *
-     * @param ec
-     * @param candidateClass
-     * @param keys
-     * @param subclasses
-     * @param ignoreCache
-     * @param limit
-     * @param startKey
-     * @return
+     * Used to load specific keys.
+     * @param keys set of keys
+     * @param acmd AbstractClassMetaData object
+     * @param clr ClassLoaderResolver
+     * @param subclasses a boolean to specify whether this is a sub class
+     * @param identityColumn identityColumn Bytes
+     * @param descriminatorColumn descriminatorColumn Bytes
+     * @param byteConverter ByteConverterContext
+     * @return returns the list of objects of candidate types
      */
     public List<?> getObjectsOfCandidateType(Set<Columns> keys,
             AbstractClassMetaData acmd, ClassLoaderResolver clr,
             boolean subclasses, Bytes identityColumn,
             Bytes descriminatorColumn, ByteConverterContext byteConverter) {
 
-        // final ClassLoaderResolver clr = ec.getClassLoaderResolver();
-        // final AbstractClassMetaData acmd =
-        // ec.getMetaDataManager().getMetaDataForClass(candidateClass, clr);
-
         List<Object> results = new ArrayList<Object>(keys.size());
-        // String tempKey = null;
 
         for (Columns idBytes : keys) {
 
@@ -228,8 +244,8 @@ public class JPQLQuery extends AbstractJPQLQuery
 
             if (descriminatorColumn != null) {
 
-                String descriminatorValue = byteConverter.getString(idBytes.getColumnValue(
-                        descriminatorColumn));
+                String descriminatorValue = byteConverter.getString(idBytes
+                        .getColumnValue(descriminatorColumn));
 
                 String className = org.datanucleus.metadata.MetaDataUtils
                         .getClassNameFromDiscriminatorValue(descriminatorValue,
@@ -239,8 +255,8 @@ public class JPQLQuery extends AbstractJPQLQuery
 
             }
 
-            Object identity =
-                byteConverter.getObjectIdentity(ec, targetClass, idBytes.getColumnValue(identityColumn));
+            Object identity = byteConverter.getObjectIdentity(ec, targetClass,
+                    idBytes.getColumnValue(identityColumn));
 
             // Not a valid subclass, don't return it as a candidate
             if (!(identity instanceof SingleFieldIdentity)) {
@@ -267,13 +283,12 @@ public class JPQLQuery extends AbstractJPQLQuery
 
     /**
      * Get all keys from a given column family. Used ranges to set the max
-     * amount
-     *
-     * @param poolName
-     * @param cfName
-     * @param selectColumns
-     * @return
-     * @throws Exception
+     * amount.
+     * @param poolName The pool name
+     * @param cfName column family name
+     * @param selectColumns columns byte array
+     * @param maxSize maximum size
+     * @return returns a set of columns
      */
     private Set<Columns> getAll(String poolName, String cfName,
             Bytes[] selectColumns, int maxSize) {
@@ -316,29 +331,4 @@ public class JPQLQuery extends AbstractJPQLQuery
         return candidateKeys;
     }
 
-
-    /**
-     * checks whether the filter has only non indexed fields
-     * @param filter
-     */
-     public void checkFilterValidity(Expression filter){
-         AnnotationEvaluator ae = new AnnotationEvaluator(candidateClass);
-         List<String> annotationlist = ae.getAnnotatedFields("javax.jdo.annotations.Index");
-
-         List<String> expressionlist = evaluator.getPrimaryExpressions(filter);
-         if(annotationlist == null){
-             nonIndexedQuery =true;
-             return;
-         }
-         if(expressionlist == null){
-             return;
-         }
-         for(String ex:expressionlist){
-             if(annotationlist.indexOf(ex)!=-1){
-                 nonIndexedQuery = false;
-                 return;
-             }
-         }
-
-     }
 }
